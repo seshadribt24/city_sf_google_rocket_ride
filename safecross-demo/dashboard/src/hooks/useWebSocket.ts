@@ -13,6 +13,13 @@ export interface NearMissAlertData {
   estimated_distance_ft?: number;
   image_path?: string;
   event_time: string;
+  vision_analysis?: {
+    risk_level: string;
+    vehicle_description?: string;
+    estimated_distance_ft?: number;
+    safety_concerns?: string;
+    analysis_time_ms?: number;
+  };
 }
 
 export function useWebSocket(url: string) {
@@ -58,6 +65,7 @@ export function useWebSocket(url: string) {
             intersection_name: data.intersection_name,
             risk_level: data.risk_level,
             image_path: data.image_path,
+            vision_analysis: data.vision_analysis,
           };
           setEvents((prev) => [alertAsEvent, ...prev].slice(0, MAX_EVENTS));
         } else {

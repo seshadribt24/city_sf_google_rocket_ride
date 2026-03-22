@@ -59,6 +59,30 @@ function VisionModal({
   const imageSrc = event.image_path
     ? `${API_BASE}/images/${event.image_path.split("/").pop()}`
     : null;
+  const [aiAnalysis, setAiAnalysis] = useState<string | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  useEffect(() => {
+    if (!va) {
+      setAiLoading(true);
+      fetch("/api/v1/ai/analyze-event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event }),
+      })
+        .then((r) => r.json())
+        .then((data) => setAiAnalysis(data.analysis))
+        .catch(() => setAiAnalysis("AI analysis unavailable."))
+        .finally(() => setAiLoading(false));
+    }
+  }, [event, va]);
+
+  const cardLabels: Record<number, string> = {
+    1: "Senior RTC",
+    2: "Disabled RTC",
+    3: "Standard Adult",
+    4: "Youth",
+  };
 
   return (
     <div
@@ -109,6 +133,30 @@ function VisionModal({
           <RiskBadge level={va?.risk_level || event.risk_level || "unknown"} />
         </div>
 
+        {/* Event details for non-vision events */}
+        {!va && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 12 }}>
+            <div style={{ fontSize: 13, color: "#CBD5E1" }}>
+              <strong style={{ color: "#F1F5F9" }}>Card Type:</strong>{" "}
+              {cardLabels[event.card_type] ?? "Unknown"}
+            </div>
+            <div style={{ fontSize: 13, color: "#CBD5E1" }}>
+              <strong style={{ color: "#F1F5F9" }}>Status:</strong>{" "}
+              {event.filter_result === "accepted" ? (
+                <span style={{ color: "#0D9488" }}>Extended +{event.extension_sec}s</span>
+              ) : (
+                <span style={{ color: "#EF4444" }}>
+                  Rejected ({event.filter_result.replace("rejected_", "")})
+                </span>
+              )}
+            </div>
+            <div style={{ fontSize: 13, color: "#CBD5E1" }}>
+              <strong style={{ color: "#F1F5F9" }}>Time:</strong>{" "}
+              {new Date(event.event_time).toLocaleTimeString()}
+            </div>
+          </div>
+        )}
+
         {va && (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {va.vehicle_description && (
@@ -136,6 +184,52 @@ function VisionModal({
               }}
             >
               Analyzed in {va.analysis_time_ms}ms by Gemini Vision
+            </div>
+          </div>
+        )}
+
+        {/* AI analysis for non-vision events */}
+        {!va && (
+          <div
+            style={{
+              marginTop: 8,
+              padding: 12,
+              background: "#1a1a2e",
+              borderRadius: 10,
+              border: "1px solid #334155",
+            }}
+          >
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 600,
+                color: "#A78BFA",
+                marginBottom: 6,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+              }}
+            >
+              Gemini Analysis
+            </div>
+            {aiLoading ? (
+              <div style={{ fontSize: 12, color: "#94A3B8", fontStyle: "italic" }}>
+                Analyzing event...
+              </div>
+            ) : (
+              <div style={{ fontSize: 13, color: "#CBD5E1", lineHeight: 1.5 }}>
+                {aiAnalysis}
+              </div>
+            )}
+            <div
+              style={{
+                fontSize: 10,
+                color: "#64748B",
+                marginTop: 8,
+                paddingTop: 6,
+                borderTop: "1px solid #334155",
+              }}
+            >
+              Powered by Google Gemini
             </div>
           </div>
         )}
@@ -201,13 +295,11 @@ export function EventFeed({ events }: Props) {
             const accepted = e.filter_result === "accepted";
             const isHighRisk =
               e.risk_level === "high" || e.risk_level === "critical";
-            const hasVision = !!e.vision_analysis || !!e.image_path;
-
             return (
               <div
                 key={`${e.event_time}-${e.card_uid_hash}-${i}`}
                 className={i === 0 ? "slide-in" : undefined}
-                onClick={() => hasVision && setSelectedEvent(e)}
+                onClick={() => setSelectedEvent(e)}
                 style={{
                   display: "flex",
                   alignItems: "center",
@@ -221,7 +313,7 @@ export function EventFeed({ events }: Props) {
                   background: isHighRisk
                     ? "rgba(220, 38, 38, 0.06)"
                     : "#0F172A",
-                  cursor: hasVision ? "pointer" : "default",
+                  cursor: "pointer",
                   transition: "background 0.2s",
                 }}
               >

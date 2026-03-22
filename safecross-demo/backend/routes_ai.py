@@ -98,6 +98,20 @@ async def ai_ask(req: AskRequest):
     return {"question": req.question, "answer": answer}
 
 
+class AnalyzeEventRequest(BaseModel):
+    event: dict
+
+
+@router.post("/analyze-event")
+async def ai_analyze_event(req: AnalyzeEventRequest):
+    """Generate a brief AI analysis for a single tap event."""
+    try:
+        analysis = await ai_client.analyze_event(req.event)
+        return {"analysis": analysis}
+    except Exception as exc:
+        return {"analysis": f"AI analysis temporarily unavailable: {exc}"}
+
+
 async def _build_near_miss_stats() -> dict:
     """Build near-miss statistics for AI context."""
     since_24h = datetime.now(timezone.utc) - timedelta(hours=24)

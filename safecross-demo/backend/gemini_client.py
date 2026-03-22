@@ -289,6 +289,35 @@ confident answer, say so clearly."""
         except Exception as exc:
             return f"AI analysis temporarily unavailable: {exc}"
 
+    async def analyze_event(self, event: dict) -> str:
+        """Generate a brief AI analysis for a single tap event."""
+        card_labels = {0: "unknown", 1: "senior RTC", 2: "disabled RTC", 3: "standard adult", 4: "youth"}
+        card_type = card_labels.get(event.get("card_type", 0), "unknown")
+        event_json = json.dumps(event, indent=2, default=str)
+
+        prompt = f"""\
+{SYSTEM_CONTEXT}
+
+Analyze this single pedestrian crossing event and provide a brief safety assessment.
+
+Event details:
+{event_json}
+
+Card type: {card_type}
+
+Provide a 2-3 sentence analysis covering:
+- Whether the signal extension (if any) was appropriate for this crossing
+- Any safety concerns based on the intersection, time of day, and card type
+- A brief recommendation if relevant
+
+Be concise and specific. Reference the intersection name and actual numbers."""
+
+        try:
+            response = await self.model.generate_content_async(prompt)
+            return response.text
+        except Exception as exc:
+            return f"AI analysis temporarily unavailable: {exc}"
+
 
 # Singleton
 ai_client = SafeCrossAI()
