@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "safecross-edge"
+version = "1.0.0"
+description = "SafeCross Edge Controller — pedestrian signal extension system"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "Proprietary"}
+dependencies = [
+    "pysnmp-lextudio>=6.0.0",
+    "pyserial>=3.5",
+    "aiohttp>=3.9.0",
+    "aiosqlite>=0.19.0",
+    "pydantic>=2.5.0",
+    "sdnotify>=0.3.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.23.0",
+    "black>=23.12.0",
+    "ruff>=0.1.9",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

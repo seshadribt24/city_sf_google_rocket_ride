@@ -1,0 +1,299 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  background: #0F172A;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 3px;
+}
+
+/* Slide-in animation for new events */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.slide-in {
+  animation: slideIn 0.35s ease-out;
+}
+
+/* Pulsing dot for empty state */
+.pulse-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #0D9488;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Spinner */
+.spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mapbox popup overrides */
+.mapboxgl-popup-content {
+  background: #F1F5F9 !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  font-size: 13px !important;
+}
+.mapboxgl-popup-tip {
+  border-top-color: #F1F5F9 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   AI PANEL
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Animated gradient border wrapper */
+.ai-panel {
+  border-radius: 14px;
+  padding: 2px;
+  background: linear-gradient(135deg, #0D9488, #7C3AED, #0D9488);
+  background-size: 200% 200%;
+  animation: gradientShift 4s ease infinite;
+  flex-shrink: 0;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.ai-panel-inner {
+  background: #1a1a2e;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  max-height: 340px;
+  overflow: hidden;
+}
+
+/* Mode toggle tabs */
+.ai-tab {
+  background: none;
+  border: none;
+  color: #64748B;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+}
+.ai-tab:hover {
+  color: #94A3B8;
+}
+.ai-tab-active {
+  background: #1E293B;
+  color: #F1F5F9;
+}
+
+/* Insight cards */
+.insight-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #0F172A;
+  border-radius: 8px;
+  border-left: 2px solid #7C3AED44;
+  animation: fadeIn 0.4s ease-out both;
+}
+
+/* Loading dots animation */
+.ai-loading {
+  padding: 16px;
+  text-align: center;
+  color: #94A3B8;
+  font-size: 13px;
+}
+
+.typing-dots .dot1,
+.typing-dots .dot2,
+.typing-dots .dot3 {
+  animation: dotBlink 1.4s infinite;
+}
+.typing-dots .dot2 { animation-delay: 0.2s; }
+.typing-dots .dot3 { animation-delay: 0.4s; }
+
+@keyframes dotBlink {
+  0%, 20% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Typing cursor */
+.typing-cursor {
+  animation: blink 0.7s infinite;
+  color: #7C3AED;
+  font-weight: 300;
+}
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+/* Gemini badge */
+.gemini-badge {
+  font-size: 9px;
+  color: #475569;
+  letter-spacing: 0.5px;
+}
+
+/* Chat bubbles */
+.chat-bubble {
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  max-width: 92%;
+  animation: fadeIn 0.3s ease-out;
+}
+.chat-user {
+  background: #0D948833;
+  color: #E2E8F0;
+  align-self: flex-end;
+  border-bottom-right-radius: 3px;
+}
+.chat-ai {
+  background: #0F172A;
+  color: #CBD5E1;
+  align-self: flex-start;
+  border-bottom-left-radius: 3px;
+  border: 1px solid #ffffff08;
+}
+
+/* Example question chips */
+.example-chip {
+  background: #0F172A;
+  border: 1px solid #334155;
+  border-radius: 16px;
+  color: #94A3B8;
+  font-size: 11px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.example-chip:hover {
+  border-color: #7C3AED66;
+  color: #CBD5E1;
+  background: #7C3AED11;
+}
+
+/* AI text input */
+.ai-input {
+  flex: 1;
+  background: #0F172A;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: #F1F5F9;
+  font-size: 12px;
+  padding: 8px 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.ai-input:focus {
+  border-color: #7C3AED88;
+}
+.ai-input::placeholder {
+  color: #475569;
+}
+
+/* AI send button */
+.ai-send-btn {
+  background: linear-gradient(135deg, #0D9488, #7C3AED);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  padding: 8px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+}
+.ai-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.ai-send-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   NEAR-MISS & RISK STYLES
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Pulsing risk badge for critical events */
+.pulse-risk {
+  animation: pulseRisk 1.5s ease-in-out infinite;
+}
+@keyframes pulseRisk {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Near-miss toast slide-in from right */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(100px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Critical toast subtle pulse */
+.near-miss-toast-critical {
+  animation: slideInRight 0.4s ease-out, toastPulse 2s ease-in-out infinite 0.4s;
+}
+@keyframes toastPulse {
+  0%, 100% { box-shadow: 0 8px 32px rgba(220, 38, 38, 0.4); }
+  50% { box-shadow: 0 8px 48px rgba(220, 38, 38, 0.7); }
+}
+
+/* Red pulse ring on map markers for near-miss */
+.near-miss-pulse-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid #DC2626;
+  transform: translate(-50%, -50%);
+  animation: pulseRing 1s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes pulseRing {
+  0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+}

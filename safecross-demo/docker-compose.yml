@@ -1,0 +1,39 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      - ./data:/app/data
+    working_dir: /app
+    command: >
+      sh -c "mkdir -p /app/data &&
+             uvicorn backend.main:app --host 0.0.0.0 --port 8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/analytics/summary')"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  dashboard:
+    build:
+      context: ./dashboard
+      args:
+        VITE_MAPBOX_TOKEN: ${VITE_MAPBOX_TOKEN:-}
+    ports:
+      - "5173:5173"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  simulator:
+    build: ./simulator
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      - API_URL=http://backend:8000
+      - RATE=3
+      - BURST=true

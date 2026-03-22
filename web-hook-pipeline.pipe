@@ -1,0 +1,94 @@
+{
+  "viewport": {
+    "x": -516.7604695126329,
+    "y": 48.601649797130904,
+    "zoom": 1.2955932182720178
+  },
+  "name": "",
+  "description": "",
+  "components": [
+    {
+      "id": "webhook_1",
+      "provider": "webhook",
+      "config": {
+        "hideForm": true,
+        "mode": "Source",
+        "parameters": {},
+        "type": "webhook"
+      },
+      "ui": {
+        "position": {
+          "x": 500,
+          "y": 180
+        },
+        "measured": {
+          "width": 160,
+          "height": 134
+        },
+        "data": {
+          "provider": "webhook",
+          "class": "source",
+          "type": "default"
+        },
+        "formDataValid": true
+      }
+    },
+    {
+      "id": "parse_1",
+      "provider": "parse",
+      "config": {},
+      "ui": {
+        "position": {
+          "x": 740,
+          "y": 180
+        },
+        "measured": {
+          "width": 160,
+          "height": 134
+        },
+        "data": {
+          "provider": "parse",
+          "class": "data",
+          "type": "default"
+        },
+        "formDataValid": true
+      },
+      "input": [
+        {
+          "lane": "tags",
+          "from": "webhook_1"
+        }
+      ]
+    },
+    {
+      "id": "response_text_1",
+      "provider": "response_text",
+      "config": {
+        "laneName": "text"
+      },
+      "ui": {
+        "position": {
+          "x": 980,
+          "y": 220
+        },
+        "measured": {
+          "width": 160,
+          "height": 64
+        },
+        "data": {
+          "provider": "response_text",
+          "class": "infrastructure",
+          "type": "default"
+        },
+        "formDataValid": true
+      },
+      "input": [
+        {
+          "lane": "text",
+          "from": "parse_1"
+        }
+      ]
+    }
+  ],
+  "project_id": "6a2471de-d726-4118-9744-edd4df9b1443"
+}

@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+aiosqlite
+pydantic
+httpx
+google-generativeai
+python-dotenv
+Pillow

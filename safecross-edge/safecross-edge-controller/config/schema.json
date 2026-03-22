@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SafeCross Intersection Configuration",
+  "description": "Per-intersection configuration for the SafeCross edge controller.",
+  "type": "object",
+  "required": ["intersection_id", "location", "crossings", "signal_controller", "nfc_reader", "timing_rules", "cloud", "ota"],
+  "properties": {
+    "intersection_id": {
+      "type": "string",
+      "description": "Unique identifier for this intersection (e.g., INT-2025-0042)."
+    },
+    "location": {
+      "type": "object",
+      "required": ["name", "latitude", "longitude"],
+      "properties": {
+        "name": { "type": "string", "description": "Human-readable intersection name." },
+        "latitude": { "type": "number", "minimum": -90, "maximum": 90 },
+        "longitude": { "type": "number", "minimum": -180, "maximum": 180 }
+      },
+      "additionalProperties": false
+    },
+    "crossings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["crossing_id", "description", "width_ft", "signal_phase", "base_walk_sec", "base_clearance_sec", "max_extension_sec", "min_extension_sec", "ped_detector_phase_bit"],
+        "properties": {
+          "crossing_id": { "type": "string", "description": "Short identifier for this crosswalk (e.g., NS, EW)." },
+          "description": { "type": "string" },
+          "width_ft": { "type": "number", "minimum": 1, "description": "Crosswalk width in feet." },
+          "signal_phase": { "type": "integer", "minimum": 1, "maximum": 16, "description": "NTCIP signal phase number." },
+          "base_walk_sec": { "type": "integer", "minimum": 1, "description": "Base walk time in seconds." },
+          "base_clearance_sec": { "type": "integer", "minimum": 1, "description": "Base pedestrian clearance time in seconds." },
+          "max_extension_sec": { "type": "integer", "minimum": 1, "description": "Maximum allowed extension in seconds." },
+          "min_extension_sec": { "type": "integer", "minimum": 1, "description": "Minimum extension floor in seconds." },
+          "ped_detector_phase_bit": { "type": "integer", "minimum": 1, "description": "Bit position for pedestrian detector in phase bitmap." }
+        },
+        "additionalProperties": false
+      }
+    },
+    "signal_controller": {
+      "type": "object",
+      "required": ["ip_address", "snmp_port", "snmp_community_read", "snmp_community_write", "protocol_version", "controller_model", "supports_scp"],
+      "properties": {
+        "ip_address": { "type": "string", "format": "ipv4" },
+        "snmp_port": { "type": "integer", "minimum": 1, "maximum": 65535, "default": 161 },
+        "snmp_community_read": { "type": "string" },
+        "snmp_community_write": { "type": "string" },
+        "protocol_version": { "type": "string", "enum": ["ntcip1202v02"] },
+        "controller_model": { "type": "string", "enum": ["econolite_cobalt", "mccain"] },
+        "supports_scp": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "nfc_reader": {
+      "type": "object",
+      "required": ["serial_port", "baud_rate", "reader_id"],
+      "properties": {
+        "serial_port": { "type": "string", "description": "Serial port device path (e.g., /dev/ttyS1)." },
+        "baud_rate": { "type": "integer", "enum": [9600, 19200, 38400, 57600, 115200] },
+        "reader_id": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "timing_rules": {
+      "type": "object",
+      "required": ["cooldown_sec", "max_extensions_per_cycle", "extension_formula", "eligible_card_types", "extend_during_active_walk", "block_during_preemption"],
+      "properties": {
+        "cooldown_sec": { "type": "integer", "minimum": 0, "description": "Seconds between allowed extensions per crossing." },
+        "max_extensions_per_cycle": { "type": "integer", "minimum": 1 },
+        "extension_formula": { "type": "string", "enum": ["linear_by_width"] },
+        "eligible_card_types": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["SENIOR_RTC", "DISABLED_RTC", "STANDARD", "YOUTH", "DESFIRE_DETECTED"] }
+        },
+        "extend_during_active_walk": { "type": "boolean" },
+        "block_during_preemption": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "cloud": {
+      "type": "object",
+      "required": ["api_url", "device_cert_path", "device_key_path", "heartbeat_interval_sec", "event_batch_size", "event_flush_interval_sec"],
+      "properties": {
+        "api_url": { "type": "string", "format": "uri" },
+        "device_cert_path": { "type": "string" },
+        "device_key_path": { "type": "string" },
+        "heartbeat_interval_sec": { "type": "integer", "minimum": 10 },
+        "event_batch_size": { "type": "integer", "minimum": 1 },
+        "event_flush_interval_sec": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "ota": {
+      "type": "object",
+      "required": ["manifest_url", "check_interval_sec", "auto_apply"],
+      "properties": {
+        "manifest_url": { "type": "string", "format": "uri" },
+        "check_interval_sec": { "type": "integer", "minimum": 60 },
+        "auto_apply": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

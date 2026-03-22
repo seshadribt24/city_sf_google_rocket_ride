@@ -1,0 +1,67 @@
+{
+  "intersection_id": "INT-2025-0042",
+  "location": {
+    "name": "Market St & 5th St",
+    "latitude": 37.7837,
+    "longitude": -122.4073
+  },
+  "crossings": [
+    {
+      "crossing_id": "NS",
+      "description": "North-south crosswalk (Market St)",
+      "width_ft": 72,
+      "signal_phase": 4,
+      "base_walk_sec": 7,
+      "base_clearance_sec": 18,
+      "max_extension_sec": 13,
+      "min_extension_sec": 6,
+      "ped_detector_phase_bit": 4
+    },
+    {
+      "crossing_id": "EW",
+      "description": "East-west crosswalk (5th St)",
+      "width_ft": 48,
+      "signal_phase": 8,
+      "base_walk_sec": 7,
+      "base_clearance_sec": 12,
+      "max_extension_sec": 8,
+      "min_extension_sec": 4,
+      "ped_detector_phase_bit": 8
+    }
+  ],
+  "signal_controller": {
+    "ip_address": "10.0.1.100",
+    "snmp_port": 161,
+    "snmp_community_read": "public",
+    "snmp_community_write": "private",
+    "protocol_version": "ntcip1202v02",
+    "controller_model": "econolite_cobalt",
+    "supports_scp": false
+  },
+  "nfc_reader": {
+    "serial_port": "/dev/ttyS1",
+    "baud_rate": 115200,
+    "reader_id": "RDR-0042-A"
+  },
+  "timing_rules": {
+    "cooldown_sec": 120,
+    "max_extensions_per_cycle": 1,
+    "extension_formula": "linear_by_width",
+    "eligible_card_types": ["SENIOR_RTC", "DISABLED_RTC"],
+    "extend_during_active_walk": true,
+    "block_during_preemption": true
+  },
+  "cloud": {
+    "api_url": "https://safecross-api.sfmta.example.com",
+    "device_cert_path": "/etc/safecross/device.pem",
+    "device_key_path": "/etc/safecross/device.key",
+    "heartbeat_interval_sec": 300,
+    "event_batch_size": 10,
+    "event_flush_interval_sec": 60
+  },
+  "ota": {
+    "manifest_url": "https://safecross-api.sfmta.example.com/ota/manifest",
+    "check_interval_sec": 86400,
+    "auto_apply": false
+  }
+}

@@ -1,0 +1,23 @@
+[Unit]
+Description=SafeCross Edge Controller
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/safecross/src/main.py --config /etc/safecross/intersection.json
+WorkingDirectory=/opt/safecross
+Restart=on-failure
+RestartSec=5
+StartLimitBurst=3
+StartLimitIntervalSec=60
+WatchdogSec=30
+NotifyAccess=all
+Environment=PYTHONUNBUFFERED=1
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/safecross /tmp/safecross-update
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
