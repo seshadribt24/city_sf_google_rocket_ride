@@ -91,6 +91,33 @@ python -m simulator.tap_simulator --rate 4 --burst
 - **Timing recommendations** — Per-intersection timing change suggestions with confidence levels
 - **Q&A** — Free-form questions answered with live system data
 
+## Built & Tested with RocketRide
+
+The entire SafeCross demo was built and tested inside the **RocketRide IDE**. RocketRide served as both our development environment and our testing workflow engine throughout the hackathon.
+
+### Development Workflow
+
+All 7 build prompts from the [demo prompting playbook](demo/safecross-demo-prompting-playbook.md) and the 5 vision feature prompts from the [vision playbook](demo/safecross-vision-prompting-playbook.md) were executed inside RocketRide's Claude Code integration. The IDE managed the full build cycle: project scaffolding, backend API, React dashboard, simulator, and Gemini AI integration.
+
+### Webhook Testing Pipeline
+
+RocketRide's visual pipeline builder was used to test the event ingestion workflow end-to-end. The pipeline (`web-hook-pipeline.pipe`) defines a three-stage flow:
+
+```
+Webhook Source  →  Parse (extract tags)  →  Response Text
+```
+
+This let us fire simulated NFC tap events into the FastAPI backend (`POST /api/v1/events`) and verify the full chain — event storage, Gemini vision analysis, WebSocket broadcast, and dashboard updates — without needing real hardware. The webhook source accepts the same `EventBatch` JSON payload the edge controller produces, making it a drop-in substitute for the RS-485 reader during development.
+
+### RocketRide Configuration
+
+```env
+ROCKETRIDE_URI=http://localhost:5565
+ROCKETRIDE_APIKEY=<your-key>
+```
+
+The RocketRide instance runs locally on port 5565. Set these in your root `.env` to connect the IDE to the testing pipeline.
+
 ## Key Docs
 
 - [`safecross-nfc-firmware-spec.md`](safecross-nfc-firmware-spec.md) — Firmware specification
