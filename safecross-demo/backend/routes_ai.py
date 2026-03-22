@@ -9,7 +9,7 @@ import aiosqlite
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from .database import DB_PATH, get_intersection_stats, get_near_misses, get_risk_summary, get_summary
+from .database import DB_PATH, get_historical_summary, get_intersection_stats, get_near_misses, get_risk_summary, get_summary
 from .gemini_client import ai_client
 from .routes_analytics import list_intersections
 
@@ -36,12 +36,14 @@ async def ai_insights():
 
     summary = await get_summary()
     intersections = await list_intersections()
+    historical = await get_historical_summary()
 
     # Gather near-miss stats for the AI prompt
     near_miss_stats = await _build_near_miss_stats()
 
     context = {
         "summary": summary,
+        "historical": historical,
         "intersections": [
             {
                 "name": i["name"],
@@ -74,10 +76,12 @@ async def ai_recommendation(intersection_id: str):
 async def ai_ask(req: AskRequest):
     summary = await get_summary()
     intersections = await list_intersections()
+    historical = await get_historical_summary()
     near_miss_stats = await _build_near_miss_stats()
 
     context = {
         "summary": summary,
+        "historical": historical,
         "intersections": [
             {
                 "name": i["name"],

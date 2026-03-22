@@ -186,6 +186,75 @@ async def get_summary():
         }
 
 
+async def get_historical_summary():
+    """Return 30-day historical trends for AI context."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        # Total events all time
+        cursor = await db.execute("SELECT COUNT(*) FROM tap_events")
+        total_all = (await cursor.fetchone())[0]
+
+        # Date range
+        cursor = await db.execute(
+            "SELECT MIN(event_time), MAX(event_time) FROM tap_events"
+        )
+        row = await cursor.fetchone()
+        date_range = {"earliest": row[0], "latest": row[1]}
+
+        # Daily average
+        cursor = await db.execute(
+            "SELECT COUNT(DISTINCT date(event_time)) FROM tap_events"
+        )
+        distinct_days = (await cursor.fetchone())[0] or 1
+        avg_per_day = round(total_all / distinct_days, 1)
+
+        # Per-intersection historical totals
+        cursor = await db.execute("""
+            SELECT e.intersection_id, i.name,
+                   COUNT(*) as total_taps,
+                   SUM(CASE WHEN e.extension_sec > 0 THEN 1 ELSE 0 END) as total_extensions,
+                   ROUND(AVG(CASE WHEN e.extension_sec > 0 THEN e.extension_sec END), 1) as avg_ext,
+                   ROUND(SUM(CASE WHEN e.snmp_result = 'success' THEN 1.0 ELSE 0 END) / COUNT(*) * 100, 1) as accept_rate
+            FROM tap_events e
+            LEFT JOIN intersections i ON e.intersection_id = i.intersection_id
+            GROUP BY e.intersection_id
+            ORDER BY total_taps DESC
+        """)
+        rows = await cursor.fetchall()
+        by_intersection = [
+            {
+                "intersection_id": r[0], "name": r[1], "total_taps": r[2],
+                "total_extensions": r[3], "avg_extension_sec": r[4],
+                "acceptance_rate": r[5],
+            }
+            for r in rows
+        ]
+
+        # Busiest hours across all history
+        cursor = await db.execute("""
+            SELECT CAST(strftime('%H', event_time) AS INTEGER) as hour,
+                   COUNT(*) as cnt
+            FROM tap_events
+            GROUP BY hour ORDER BY cnt DESC LIMIT 5
+        """)
+        peak_hours = [{"hour": r[0], "count": r[1]} for r in await cursor.fetchall()]
+
+        # Card type breakdown
+        cursor = await db.execute("""
+            SELECT card_type, COUNT(*) as cnt FROM tap_events GROUP BY card_type ORDER BY cnt DESC
+        """)
+        card_types = {str(r[0]): r[1] for r in await cursor.fetchall()}
+
+        return {
+            "total_events_all_time": total_all,
+            "distinct_days": distinct_days,
+            "avg_events_per_day": avg_per_day,
+            "date_range": date_range,
+            "by_intersection": by_intersection,
+            "peak_hours_all_time": peak_hours,
+            "card_type_breakdown": card_types,
+        }
+
+
 async def get_intersection_stats(intersection_id: str):
     async with aiosqlite.connect(DB_PATH) as db:
         db.row_factory = aiosqlite.Row

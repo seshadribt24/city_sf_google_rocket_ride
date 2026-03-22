@@ -171,25 +171,42 @@ Near-miss / vehicle conflict data (last 24 hours):
 - Peak near-miss hours: {json.dumps(nm.get('peak_hours', []), default=str)}
 """
 
+        # Build historical context section
+        historical_section = ""
+        hist = events_summary.get("historical")
+        if hist:
+            historical_section = f"""
+30-day historical trends:
+- Total events over {hist.get('distinct_days', 0)} days: {hist.get('total_events_all_time', 0)}
+- Average events per day: {hist.get('avg_events_per_day', 0)}
+- Date range: {hist.get('date_range', {})}
+- Per-intersection totals (30-day): {json.dumps(hist.get('by_intersection', []), default=str)}
+- Peak hours across all history: {json.dumps(hist.get('peak_hours_all_time', []), default=str)}
+- Card type breakdown: {json.dumps(hist.get('card_type_breakdown', {}), default=str)}
+"""
+
         prompt = f"""\
 You are an AI traffic safety analyst for SafeCross SF, an adaptive \
 pedestrian crossing system that extends walk signals for seniors.
 
 Analyze this crossing data and provide 3-4 actionable insights for \
-SFMTA traffic engineers. Focus on:
-- Which intersections have the highest senior crossing demand
+SFMTA traffic engineers. You have both today's real-time data and \
+30-day historical trends. Focus on:
+- Which intersections have the highest senior crossing demand (use historical totals)
 - Time-of-day patterns that suggest permanent timing changes
+- Historical trends: are certain intersections consistently busier?
 - Any intersections where rejection rates suggest a problem
 - Vehicle conflict / near-miss patterns from vision analysis
-- Which intersections have the most dangerous vehicle conflicts
 - Specific recommendations with numbers (e.g., "increase baseline \
 walk time by 8 seconds at Market & 5th during 8-9am")
 
-Data:
+Today's real-time data:
 {json_summary}
 {near_miss_section}
+{historical_section}
 Respond in 3-4 concise bullet points. Be specific with intersection \
-names, times, and recommended seconds. No hedging language."""
+names, times, and recommended seconds. Reference historical data \
+where relevant. No hedging language."""
 
         try:
             response = await self.model.generate_content_async(prompt)
@@ -256,14 +273,15 @@ Intersection data:
         prompt = f"""\
 {SYSTEM_CONTEXT}
 
-Current system data:
+Current system data (includes today's real-time stats AND 30-day historical trends):
 {json_context}
 
 A traffic engineer asks: "{question}"
 
-Answer concisely with specific data from the system. Reference intersection \
-names, times, and numbers. If the data doesn't support a confident answer, \
-say so clearly."""
+Answer concisely with specific data from the system. Use both today's \
+real-time data and 30-day historical trends where relevant. Reference \
+intersection names, times, and numbers. If the data doesn't support a \
+confident answer, say so clearly."""
 
         try:
             response = await self.model.generate_content_async(prompt)
