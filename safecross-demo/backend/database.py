@@ -305,6 +305,7 @@ async def get_risk_summary():
             FROM tap_events e
             LEFT JOIN intersections i ON e.intersection_id = i.intersection_id
             WHERE e.risk_level != 'unknown'
+              AND e.event_time >= date('now', 'start of day')
             GROUP BY e.intersection_id
             ORDER BY (SUM(CASE WHEN e.risk_level IN ('high','critical') THEN 1 ELSE 0 END)) DESC
         """)
