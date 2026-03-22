@@ -1,55 +1,12 @@
 {
   "viewport": {
-    "x": -200,
-    "y": 50,
-    "zoom": 1.0
+    "x": -436.02612675585783,
+    "y": 88.4587493695982,
+    "zoom": 1.0863779258198882
   },
   "name": "SafeCross Vision API Test",
   "description": "Tests the backend vision pipeline: POST event with image → verify vision_analysis in response → LLM validates analysis quality",
   "components": [
-    {
-      "id": "webhook_trigger",
-      "provider": "webhook",
-      "config": {
-        "hideForm": true,
-        "mode": "Source",
-        "parameters": {},
-        "type": "webhook"
-      },
-      "ui": {
-        "position": { "x": 100, "y": 200 },
-        "measured": { "width": 160, "height": 134 },
-        "data": {
-          "provider": "webhook",
-          "class": "source",
-          "type": "default"
-        },
-        "formDataValid": true
-      }
-    },
-    {
-      "id": "parse_trigger",
-      "provider": "parse",
-      "config": {
-        "description": "Parse the incoming webhook payload containing test config (api_url, intersection image path)"
-      },
-      "ui": {
-        "position": { "x": 340, "y": 200 },
-        "measured": { "width": 160, "height": 134 },
-        "data": {
-          "provider": "parse",
-          "class": "data",
-          "type": "default"
-        },
-        "formDataValid": true
-      },
-      "input": [
-        {
-          "lane": "tags",
-          "from": "webhook_trigger"
-        }
-      ]
-    },
     {
       "id": "post_event",
       "provider": "webhook",
@@ -62,21 +19,21 @@
         "type": "webhook"
       },
       "ui": {
-        "position": { "x": 580, "y": 140 },
-        "measured": { "width": 160, "height": 134 },
+        "position": {
+          "x": 580,
+          "y": 140
+        },
+        "measured": {
+          "width": 160,
+          "height": 134
+        },
         "data": {
           "provider": "webhook",
           "class": "source",
           "type": "default"
         },
         "formDataValid": true
-      },
-      "input": [
-        {
-          "lane": "text",
-          "from": "parse_trigger"
-        }
-      ]
+      }
     },
     {
       "id": "parse_response",
@@ -85,8 +42,14 @@
         "description": "Parse the API response JSON. Extract: status, events_received, vision_analyses array. Check that vision_analyses[0] contains risk_level, vehicle_description, estimated_distance_ft, safety_concerns, analysis_time_ms."
       },
       "ui": {
-        "position": { "x": 820, "y": 140 },
-        "measured": { "width": 160, "height": 134 },
+        "position": {
+          "x": 820,
+          "y": 140
+        },
+        "measured": {
+          "width": 160,
+          "height": 134
+        },
         "data": {
           "provider": "parse",
           "class": "data",
@@ -102,121 +65,20 @@
       ]
     },
     {
-      "id": "validate_vision",
-      "provider": "openai",
-      "config": {
-        "model": "gpt-4o-mini",
-        "prompt": "You are a QA test validator for the SafeCross vision pipeline. Analyze this API response and determine if the vision analysis is valid.\n\nCheck these criteria:\n1. PASS: response.status === 'ok'\n2. PASS: response.events_received === 1\n3. PASS: vision_analyses array has at least 1 entry\n4. PASS: vision_analyses[0].risk_level is one of: low, medium, high, critical\n5. PASS: vision_analyses[0].vehicle_description is a non-empty string\n6. PASS: vision_analyses[0].estimated_distance_ft is a number >= 0\n7. PASS: vision_analyses[0].safety_concerns is a non-empty string\n8. PASS: vision_analyses[0].analysis_time_ms is a number > 0\n\nRespond with a structured test report:\n- Overall: PASS or FAIL\n- Each check: PASS/FAIL with the actual value\n- Summary: one sentence\n\nAPI Response:\n{text}",
-        "temperature": 0
-      },
-      "ui": {
-        "position": { "x": 1060, "y": 140 },
-        "measured": { "width": 160, "height": 134 },
-        "data": {
-          "provider": "openai",
-          "class": "llm",
-          "type": "default"
-        },
-        "formDataValid": true
-      },
-      "input": [
-        {
-          "lane": "text",
-          "from": "parse_response"
-        }
-      ]
-    },
-    {
-      "id": "check_image_served",
-      "provider": "webhook",
-      "config": {
-        "hideForm": true,
-        "mode": "Source",
-        "parameters": {
-          "description": "GET the saved image from /images/ endpoint to verify it was persisted and is serveable. Checks that Content-Type is image/jpeg and response is 200."
-        },
-        "type": "webhook"
-      },
-      "ui": {
-        "position": { "x": 820, "y": 320 },
-        "measured": { "width": 160, "height": 134 },
-        "data": {
-          "provider": "webhook",
-          "class": "source",
-          "type": "default"
-        },
-        "formDataValid": true
-      },
-      "input": [
-        {
-          "lane": "text",
-          "from": "parse_response"
-        }
-      ]
-    },
-    {
-      "id": "validate_image",
-      "provider": "openai",
-      "config": {
-        "model": "gpt-4o-mini",
-        "prompt": "You are a QA test validator. Check if the image endpoint response indicates a valid JPEG image was served.\n\nCheck these criteria:\n1. PASS: HTTP status is 200\n2. PASS: Content-Type is image/jpeg\n3. PASS: Content-Length is > 0 (image has actual data)\n\nRespond with:\n- Overall: PASS or FAIL\n- Each check: PASS/FAIL with actual value\n- Summary: one sentence\n\nResponse headers:\n{text}",
-        "temperature": 0
-      },
-      "ui": {
-        "position": { "x": 1060, "y": 320 },
-        "measured": { "width": 160, "height": 134 },
-        "data": {
-          "provider": "openai",
-          "class": "llm",
-          "type": "default"
-        },
-        "formDataValid": true
-      },
-      "input": [
-        {
-          "lane": "text",
-          "from": "check_image_served"
-        }
-      ]
-    },
-    {
-      "id": "final_report",
-      "provider": "openai",
-      "config": {
-        "model": "gpt-4o-mini",
-        "prompt": "You are a QA test report generator. Combine the two test results below into a final test report for the SafeCross Vision Pipeline.\n\nFormat the report as:\n\n# SafeCross Vision Pipeline Test Report\n\n## Test 1: Vision Analysis API\n{vision_result}\n\n## Test 2: Image Persistence\n{image_result}\n\n## Overall Verdict\nPASS only if both tests passed. Otherwise FAIL with which test(s) failed.\n\nVision Analysis Result:\n{text}",
-        "temperature": 0
-      },
-      "ui": {
-        "position": { "x": 1300, "y": 230 },
-        "measured": { "width": 160, "height": 134 },
-        "data": {
-          "provider": "openai",
-          "class": "llm",
-          "type": "default"
-        },
-        "formDataValid": true
-      },
-      "input": [
-        {
-          "lane": "text",
-          "from": "validate_vision"
-        },
-        {
-          "lane": "text",
-          "from": "validate_image"
-        }
-      ]
-    },
-    {
       "id": "output_report",
       "provider": "response_text",
       "config": {
         "laneName": "text"
       },
       "ui": {
-        "position": { "x": 1540, "y": 230 },
-        "measured": { "width": 160, "height": 64 },
+        "position": {
+          "x": 1060,
+          "y": 180
+        },
+        "measured": {
+          "width": 160,
+          "height": 64
+        },
         "data": {
           "provider": "response_text",
           "class": "infrastructure",
@@ -227,7 +89,7 @@
       "input": [
         {
           "lane": "text",
-          "from": "final_report"
+          "from": "parse_response"
         }
       ]
     }
