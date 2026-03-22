@@ -136,7 +136,7 @@ function AlertToast({
           flexShrink: 0,
         }}
       >
-        \u00D7
+        {"\u00D7"}
       </button>
     </div>
   );
