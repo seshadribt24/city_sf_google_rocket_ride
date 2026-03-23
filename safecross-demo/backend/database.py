@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 
 import aiosqlite
 
@@ -302,7 +302,7 @@ async def get_intersection_stats(intersection_id: str):
 
 async def get_hourly_distribution(intersection_id: str | None = None):
     async with aiosqlite.connect(DB_PATH) as db:
-        since = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        since = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
         query = "SELECT event_time FROM tap_events WHERE event_time >= ?"
         params: list = [since]
         if intersection_id:
@@ -315,7 +315,9 @@ async def get_hourly_distribution(intersection_id: str | None = None):
         for row in rows:
             try:
                 t = datetime.fromisoformat(row[0])
-                hours[t.hour] += 1
+                # Use local time for display
+                local_t = t.astimezone()
+                hours[local_t.hour] += 1
             except (ValueError, IndexError):
                 pass
         return [{"hour": h, "count": c} for h, c in sorted(hours.items())]
